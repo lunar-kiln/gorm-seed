@@ -63,14 +63,22 @@ func CreateSeeder(opts CreateOptions) (string, error) {
 	packageName := opts.PackageName
 	if packageName == "" {
 		pkgDir := opts.Dir
-		packageName = filepath.Base(pkgDir)
-		// If directory is ".", use parent directory name
-		if packageName == "." {
-			absDir, err := filepath.Abs(pkgDir)
-			if err != nil {
-				return "", fmt.Errorf("failed to get absolute path: %w", err)
+		// Check if main.go exists in the directory
+		mainGoPath := filepath.Join(pkgDir, "main.go")
+		if _, err := os.Stat(mainGoPath); err == nil {
+			// If main.go exists, use package main
+			packageName = "main"
+		} else {
+			// Otherwise use directory name as package
+			packageName = filepath.Base(pkgDir)
+			// If directory is ".", use parent directory name
+			if packageName == "." {
+				absDir, err := filepath.Abs(pkgDir)
+				if err != nil {
+					return "", fmt.Errorf("failed to get absolute path: %w", err)
+				}
+				packageName = filepath.Base(absDir)
 			}
-			packageName = filepath.Base(absDir)
 		}
 	}
 
