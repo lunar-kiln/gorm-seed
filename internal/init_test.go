@@ -24,7 +24,7 @@ func TestInitProject(t *testing.T) {
 	// Verify all files were created
 	expectedFiles := []string{
 		filepath.Join(seederDir, "main.go"),
-		filepath.Join(seederDir, "config.go"),
+		filepath.Join(seederDir, "query", "config.go"),
 		filepath.Join(seederDir, "README.md"),
 	}
 
@@ -118,12 +118,12 @@ func TestGenerateMainGoTemplate(t *testing.T) {
 }
 
 func TestGenerateConfigTemplate(t *testing.T) {
-	content := generateConfigTemplate("seeders")
+	content := GenerateConfigTemplate("query")
 
 	// Check essential parts of the template
 	expectedStrings := []string{
-		"package seeders",
-		"func initDatabases()",
+		"package query",
+		"func InitDatabases()",
 		"gorm.Open(sqlite.Open",
 		"deps := make(map[string]interface{})",
 		"return db, deps",
@@ -184,14 +184,14 @@ func TestInitProject_GeneratedFilesContent(t *testing.T) {
 	}
 
 	// Test config.go content
-	configPath := filepath.Join(seederDir, "config.go")
+	configPath := filepath.Join(seederDir, "query", "config.go")
 	configContent, err := os.ReadFile(configPath)
 	if err != nil {
 		t.Fatalf("Failed to read config.go: %v", err)
 	}
 
-	if !strings.Contains(string(configContent), "initDatabases") {
-		t.Error("config.go missing initDatabases function")
+	if !strings.Contains(string(configContent), "InitDatabases") {
+		t.Error("config.go missing InitDatabases function")
 	}
 
 	// Test README.md content
@@ -242,9 +242,12 @@ func TestInitProject_FilePermissions(t *testing.T) {
 	}
 
 	// Check file permissions
-	files := []string{"main.go", "config.go", "README.md"}
-	for _, file := range files {
-		filePath := filepath.Join(seederDir, file)
+	files := map[string]string{
+		"main.go":   filepath.Join(seederDir, "main.go"),
+		"config.go": filepath.Join(seederDir, "query", "config.go"),
+		"README.md": filepath.Join(seederDir, "README.md"),
+	}
+	for file, filePath := range files {
 		info, err := os.Stat(filePath)
 		if err != nil {
 			t.Fatalf("Failed to stat file %s: %v", file, err)

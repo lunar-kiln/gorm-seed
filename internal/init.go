@@ -33,9 +33,15 @@ func InitProject(opts InitOptions) error {
 		return fmt.Errorf("failed to write main.go: %w", err)
 	}
 
-	// Create config.go for database configuration
-	configGoPath := filepath.Join(opts.Dir, "config.go")
-	configGoContent := generateConfigTemplate(filepath.Base(opts.Dir))
+	// Create query directory
+	queryDir := filepath.Join(opts.Dir, "query")
+	if err := os.MkdirAll(queryDir, 0755); err != nil {
+		return fmt.Errorf("failed to create query directory: %w", err)
+	}
+
+	// Create config.go for database configuration inside query directory
+	configGoPath := filepath.Join(queryDir, "config.go")
+	configGoContent := GenerateConfigTemplate("query")
 	if err := os.WriteFile(configGoPath, []byte(configGoContent), 0644); err != nil {
 		return fmt.Errorf("failed to write config.go: %w", err)
 	}
@@ -61,6 +67,8 @@ import (
 
 	gorm_seed "github.com/lunar-kiln/gorm-seed"
 	"gorm.io/gorm"
+
+	_ "` + packageName + `/query"
 )
 
 var (
@@ -80,7 +88,7 @@ func main() {
 	}
 
 	// Initialize database
-	db, deps := initDatabases()
+	db, deps := query.InitDatabases()
 
 	// Handle list command
 	if *listSeeders {
@@ -194,98 +202,6 @@ func printUsage() {
 `
 }
 
-func generateConfigTemplate(packageName string) string {
-	return fmt.Sprintf(`package %s
-
-import (
-	"log"
-
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-)
-
-// initDatabases initializes database connections
-// Customize this function based on your database setup
-func initDatabases() (*gorm.DB, map[string]interface{}) {
-	// TODO: Configure your database connection here
-	// Example with SQLite:
-	db, err := gorm.Open(sqlite.Open("seeder.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
-
-	// Initialize dependencies that seeders might need
-	deps := make(map[string]interface{})
-
-	// Example: Add MongoDB connection
-	// mongodb := initMongoDB()
-	// deps["mongodb"] = mongodb
-
-	// Example: Add Casbin enforcer
-	// enforcer := initCasbin(db)
-	// deps["enforcer"] = enforcer
-
-	return db, deps
-}
-
-// Example: MongoDB initialization
-// func initMongoDB() *mongo.Database {
-//     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-//     defer cancel()
-//
-//     mongoURI := "mongodb://localhost:27017"
-//     clientOptions := options.Client().ApplyURI(mongoURI)
-//     client, err := mongo.Connect(ctx, clientOptions)
-//     if err != nil {
-//         log.Fatal("Failed to connect to MongoDB:", err)
-//     }
-//
-//     if err := client.Ping(ctx, nil); err != nil {
-//         log.Fatal("Failed to ping MongoDB:", err)
-//     }
-//
-//     return client.Database("your_database")
-// }
-
-// Example: Casbin initialization
-// func initCasbin(db *gorm.DB) *casbin.Enforcer {
-//     adapter, err := gormadapter.NewAdapterByDB(db)
-//     if err != nil {
-//         log.Fatal("Failed to create Casbin adapter:", err)
-//     }
-//
-//     model := `+"`"+`
-//     [request_definition]
-//     r = sub, obj, act
-//
-//     [policy_definition]
-//     p = sub, obj, act
-//
-//     [role_definition]
-//     g = _, _
-//
-//     [policy_effect]
-//     e = some(where (p.eft == allow))
-//
-//     [matchers]
-//     m = r.obj == p.obj && g(r.sub, p.sub) && r.act == p.act
-//     `+"`"+`
-//
-//     m, err := casbinmodel.NewModelFromString(model)
-//     if err != nil {
-//         log.Fatal("Failed to create Casbin model:", err)
-//     }
-//
-//     enforcer, err := casbin.NewEnforcer(m, adapter)
-//     if err != nil {
-//         log.Fatal("Failed to create Casbin enforcer:", err)
-//     }
-//
-//     return enforcer
-// }
-`, packageName)
-}
-
 func generateReadmeTemplate() string {
 	return `# Database Seeders
 
@@ -297,7 +213,7 @@ This seeder project was initialized with` + " `gorm-seed init`" + `.
 
 ## Database Configuration
 
-Edit ` + "`config.go`" + ` to configure your database connection:
+Edit ` + "`query/config.go`" + ` to configure your database connection:
 
 - SQLite (default)
 - PostgreSQL

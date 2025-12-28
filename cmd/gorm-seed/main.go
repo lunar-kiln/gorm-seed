@@ -56,11 +56,11 @@ func handleInit() {
 	fmt.Println()
 	fmt.Println("Files created:")
 	fmt.Printf("  - %s/main.go\n", *initProject)
-	fmt.Printf("  - %s/config.go\n", *initProject)
+	fmt.Printf("  - %s/query/config.go\n", *initProject)
 	fmt.Printf("  - %s/README.md\n", *initProject)
 	fmt.Println()
 	fmt.Println("Next steps:")
-	fmt.Printf("  1. Edit %s/config.go to configure your database\n", *initProject)
+	fmt.Printf("  1. Edit %s/query/config.go to configure your database\n", *initProject)
 	fmt.Printf("  2. Create seeders: gorm-seed --create=users --dir=%s --seq\n", *initProject)
 	fmt.Printf("  3. Run seeders: cd %s && go run . --all\n", *initProject)
 }
