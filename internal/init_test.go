@@ -122,7 +122,7 @@ func TestGenerateConfigTemplate(t *testing.T) {
 
 	// Check essential parts of the template
 	expectedStrings := []string{
-		"package main",
+		"package seeders",
 		"func initDatabases()",
 		"gorm.Open(sqlite.Open",
 		"deps := make(map[string]interface{})",

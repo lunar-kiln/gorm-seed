@@ -195,7 +195,7 @@ func printUsage() {
 }
 
 func generateConfigTemplate(packageName string) string {
-	return `package main
+	return fmt.Sprintf(`package %s
 
 import (
 	"log"
@@ -254,7 +254,7 @@ func initDatabases() (*gorm.DB, map[string]interface{}) {
 //         log.Fatal("Failed to create Casbin adapter:", err)
 //     }
 //
-//     model := ` + "`" + `
+//     model := `+"`"+`
 //     [request_definition]
 //     r = sub, obj, act
 //
@@ -269,7 +269,7 @@ func initDatabases() (*gorm.DB, map[string]interface{}) {
 //
 //     [matchers]
 //     m = r.obj == p.obj && g(r.sub, p.sub) && r.act == p.act
-//     ` + "`" + `
+//     `+"`"+`
 //
 //     m, err := casbinmodel.NewModelFromString(model)
 //     if err != nil {
@@ -283,7 +283,7 @@ func initDatabases() (*gorm.DB, map[string]interface{}) {
 //
 //     return enforcer
 // }
-`
+`, packageName)
 }
 
 func generateReadmeTemplate() string {
