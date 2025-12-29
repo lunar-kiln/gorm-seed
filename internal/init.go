@@ -8,7 +8,8 @@ import (
 
 // InitOptions configures how the init command should create files
 type InitOptions struct {
-	Dir string
+	Dir      string
+	Database string // Database type: "postgresql", "mysql", or empty string
 }
 
 // InitProject creates a main.go file with database setup in the specified directory
@@ -41,7 +42,7 @@ func InitProject(opts InitOptions) error {
 
 	// Create config.go for database configuration inside query directory
 	configGoPath := filepath.Join(queryDir, "config.go")
-	configGoContent := GenerateConfigTemplate("query")
+	configGoContent := GenerateConfigTemplate("query", opts.Database)
 	if err := os.WriteFile(configGoPath, []byte(configGoContent), 0644); err != nil {
 		return fmt.Errorf("failed to write config.go: %w", err)
 	}

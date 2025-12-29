@@ -17,6 +17,7 @@ var (
 	// Options
 	seederDir  = flag.String("dir", "./seeders", "Directory for seeder files (used with --create)")
 	sequential = flag.Bool("seq", false, "Use sequential numbering (001, 002) instead of timestamp")
+	database   = flag.String("db", "", "Database type for init (postgresql, mysql)")
 )
 
 func main() {
@@ -43,10 +44,14 @@ func main() {
 
 func handleInit() {
 	fmt.Printf("Initializing seeder project in: %s\n", *initProject)
+	if *database != "" {
+		fmt.Printf("Database: %s\n", *database)
+	}
 	fmt.Println()
 
 	err := internal.InitProject(internal.InitOptions{
-		Dir: *initProject,
+		Dir:      *initProject,
+		Database: *database,
 	})
 	if err != nil {
 		log.Fatal("Failed to initialize project:", err)
@@ -98,9 +103,16 @@ func printUsage() {
 	fmt.Println("\nOptions:")
 	fmt.Println("  --dir=<path>      Directory for seeder files (default: ./seeders)")
 	fmt.Println("  --seq             Use sequential numbering (001, 002) instead of timestamp")
+	fmt.Println("  --db=<type>       Database type for init: postgresql, mysql (used with --init)")
 	fmt.Println("\nExamples:")
 	fmt.Println("  # Initialize seeder project")
 	fmt.Println("  gorm-seed --init=./database/seeders")
+	fmt.Println()
+	fmt.Println("  # Initialize with PostgreSQL")
+	fmt.Println("  gorm-seed --init=./database/seeders --db=postgresql")
+	fmt.Println()
+	fmt.Println("  # Initialize with MySQL")
+	fmt.Println("  gorm-seed --init=./database/seeders --db=mysql")
 	fmt.Println()
 	fmt.Println("  # Create a seeder with sequential numbering")
 	fmt.Println("  gorm-seed --create=users --dir=./database/seeders --seq")

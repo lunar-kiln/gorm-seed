@@ -118,13 +118,13 @@ func TestGenerateMainGoTemplate(t *testing.T) {
 }
 
 func TestGenerateConfigTemplate(t *testing.T) {
-	content := GenerateConfigTemplate("query")
+	content := GenerateConfigTemplate("query", "")
 
 	// Check essential parts of the template
 	expectedStrings := []string{
 		"package query",
 		"func InitDatabases()",
-		"gorm.Open(sqlite.Open",
+		"var db *gorm.DB",
 		"deps := make(map[string]interface{})",
 		"return db, deps",
 	}
